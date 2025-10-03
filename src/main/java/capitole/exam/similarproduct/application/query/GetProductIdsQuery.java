@@ -1,5 +1,4 @@
 package capitole.exam.similarproduct.application.query;
 
-public record GetProductIds(String id) {
-
+public record GetProductIdsQuery(String id) {
 }
