@@ -1,0 +1,2 @@
+# similarproduct
+CQRS hexagonal architecture
