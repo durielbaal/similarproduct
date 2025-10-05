@@ -1,5 +1,3 @@
 package capitole.exam.similarproduct.infrastructure.rest.dto;
 
-public class ProductResponse {
-
-}
+public record ProductIdsResponse(String id) {}

@@ -1,5 +1,3 @@
 package capitole.exam.similarproduct.infrastructure.rest.dto;
 
-public class ProductRequest {
-
-}
+public record ProductRequest(String id) { }

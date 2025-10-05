@@ -5,9 +5,10 @@ import capitole.exam.similarproduct.application.query.GetProductIdsQuery;
 import capitole.exam.similarproduct.domain.model.ProductDetail;
 import capitole.exam.similarproduct.infrastructure.persistance.adapter.ProductDetailRepositoryAdapter;
 import java.math.BigDecimal;
+import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
-
-public class GetProductIdsUseCase implements UseCase<GetProductIdsQuery, Flux<BigDecimal>> {
+@Component
+public class GetProductIdsUseCase implements UseCase<GetProductIdsQuery, Flux<String>> {
   private final ProductDetailRepositoryAdapter productDetailRepositoryAdapter;
 
   public GetProductIdsUseCase(ProductDetailRepositoryAdapter productDetailRepositoryAdapter) {
@@ -15,7 +16,7 @@ public class GetProductIdsUseCase implements UseCase<GetProductIdsQuery, Flux<Bi
   }
 
   @Override
-  public Flux<BigDecimal> execute(GetProductIdsQuery input) {
+  public Flux<String> execute(GetProductIdsQuery input) {
     return productDetailRepositoryAdapter.findSimilarProductIds(input.id());
   }
 }

@@ -1,31 +1,66 @@
 package capitole.exam.similarproduct.infrastructure.persistance.adapter;
 
 import capitole.exam.similarproduct.domain.model.ProductDetail;
-import java.math.BigDecimal;
+import capitole.exam.similarproduct.infrastructure.exception.product.ProductIdNotValidException;
+import capitole.exam.similarproduct.infrastructure.exception.product.ProductNotFoundException;
+import capitole.exam.similarproduct.infrastructure.validator.ProductValidator;
+import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
-
+import reactor.core.publisher.Mono;
+@Component
 public class ProductDetailRepositoryAdapter {
   private final WebClient webClient;
-
+  @Value("${webclient.product.detail.url}")
+  private String productDetailUrl;
+  @Value("${webclient.product.similar.ids.url}")
+  private String productSimilarIdsUrl;
   public ProductDetailRepositoryAdapter(WebClient webClient) {
     this.webClient = webClient;
   }
 
-  public Flux<BigDecimal> findSimilarProductIds(String productId) {
+  public Flux<String> findSimilarProductIds(String productId) {
+    if (!ProductValidator.validateProductId(productId)) {
+      return Flux.error(new ProductIdNotValidException());
+    }
+
+    // 👇 puedes contar, loggear o devolver error
     return webClient.get()
-        .uri("/product/{productId}/similarids", productId)
+        .uri(productSimilarIdsUrl, productId)
         .retrieve()
-        .bodyToFlux(BigDecimal.class);
+        .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> {
+          if (clientResponse.statusCode().value() == 404) {
+            return Mono.error(new ProductNotFoundException(productId));
+          }
+          return clientResponse.createException();
+        })
+        .onStatus(HttpStatusCode::is5xxServerError, ClientResponse::createException)
+        .bodyToMono(new ParameterizedTypeReference<List<String>>() {})
+        .flatMapMany(Flux::fromIterable);
   }
 
-  public ProductDetail findProductDetail(String productId) {
+  public Mono<ProductDetail> findProductDetail(String productId) {
+    if(!ProductValidator.validateProductId(productId)){
+      return Mono.error(new ProductIdNotValidException());
+    }
     return webClient.get()
-        .uri("/product/{productId}", productId)
+        .uri(productDetailUrl, productId)
         .retrieve()
-        .bodyToMono(ProductDetail.class)
-        .block();
+        .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> {
+          if (clientResponse.statusCode().value() == 404) {
+            return Mono.error(new ProductNotFoundException(productId));
+          }
+          return clientResponse.createException();
+        })
+        .onStatus(HttpStatusCode::is5xxServerError, ClientResponse::createException)
+        .bodyToMono(ProductDetail.class);
   }
-
-
 }
+
+
+
