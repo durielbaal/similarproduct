@@ -2,10 +2,13 @@ package capitole.exam.similarproduct.infrastructure.persistance.adapter;
 
 import capitole.exam.similarproduct.domain.model.ProductDetail;
 import capitole.exam.similarproduct.domain.port.output.ProductDetailRepository;
+import capitole.exam.similarproduct.infrastructure.exception.product.ExternalServiceProductTimerException;
 import capitole.exam.similarproduct.infrastructure.exception.product.ProductIdNotValidException;
 import capitole.exam.similarproduct.infrastructure.exception.product.ProductNotFoundException;
 import capitole.exam.similarproduct.infrastructure.validator.ProductValidator;
+import io.netty.handler.timeout.ReadTimeoutException;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatusCode;
@@ -30,7 +33,6 @@ public class ProductDetailRepositoryAdapter implements ProductDetailRepository {
       return Flux.error(new ProductIdNotValidException());
     }
 
-    // 👇 puedes contar, loggear o devolver error
     return webClient.get()
         .uri(productSimilarIdsUrl, productId)
         .retrieve()
@@ -42,6 +44,16 @@ public class ProductDetailRepositoryAdapter implements ProductDetailRepository {
         })
         .onStatus(HttpStatusCode::is5xxServerError, ClientResponse::createException)
         .bodyToMono(new ParameterizedTypeReference<List<String>>() {})
+        .onErrorMap(e -> {
+          Throwable rootCause = (e.getCause() != null) ? e.getCause() : e;
+
+          if (rootCause instanceof ReadTimeoutException ||
+              rootCause instanceof TimeoutException) {
+
+            return new ExternalServiceProductTimerException();
+          }
+          return e;
+        })
         .flatMapMany(Flux::fromIterable);
   }
   @Override
@@ -59,7 +71,18 @@ public class ProductDetailRepositoryAdapter implements ProductDetailRepository {
           return clientResponse.createException();
         })
         .onStatus(HttpStatusCode::is5xxServerError, ClientResponse::createException)
-        .bodyToMono(ProductDetail.class);
+        .bodyToMono(ProductDetail.class)
+        .onErrorMap(e -> {
+          Throwable rootCause = (e.getCause() != null) ? e.getCause() : e;
+
+          if (rootCause instanceof ReadTimeoutException ||
+              rootCause instanceof TimeoutException) {
+
+            return new ExternalServiceProductTimerException();
+          }
+          return e;
+        });
+
   }
 }
 

@@ -16,6 +16,9 @@ public class ProductExceptionHandler {
   public ResponseEntity<String> handleProductIdNotValid(ProductIdNotValidException ex) {
     return ResponseEntity.ok(ex.getMessage());
   }
-
+  @ExceptionHandler(ExternalServiceProductTimerException.class)
+  public ResponseEntity<String> handleExternalServiceTimeout(ExternalServiceProductTimerException ex) {
+    return ResponseEntity.ok(ex.getMessage());
+  }
 
 }
