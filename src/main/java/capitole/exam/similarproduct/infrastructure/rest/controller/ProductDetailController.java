@@ -2,11 +2,10 @@ package capitole.exam.similarproduct.infrastructure.rest.controller;
 
 import capitole.exam.similarproduct.application.query.GetProductDetailQuery;
 import capitole.exam.similarproduct.application.query.GetProductIdsQuery;
-import capitole.exam.similarproduct.application.useCase.GetProductDetailUseCase;
-import capitole.exam.similarproduct.application.useCase.GetProductIdsUseCase;
 import capitole.exam.similarproduct.domain.model.ProductDetail;
+import capitole.exam.similarproduct.domain.port.input.ProductDetailPort;
+import capitole.exam.similarproduct.domain.port.input.ProductIdsPort;
 import capitole.exam.similarproduct.infrastructure.rest.dto.ProductDetailResponse;
-import capitole.exam.similarproduct.infrastructure.rest.dto.ProductIdsResponse;
 import capitole.exam.similarproduct.infrastructure.rest.mapper.ProductMapper;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,13 +20,14 @@ import reactor.core.publisher.Mono;
 @Validated
 public class ProductDetailController {
 
-  private final GetProductDetailUseCase getProductDetailUseCase;
-  private final GetProductIdsUseCase getProductIdsUseCase;
+  private final ProductDetailPort productDetailPort;
+  private final ProductIdsPort productIdsPort;
   private final ProductMapper productMapper;
-  public ProductDetailController(GetProductDetailUseCase getProductDetailUseCase, GetProductIdsUseCase getProductIdsUseCase,
+  public ProductDetailController(ProductDetailPort productDetailPort,
+      ProductIdsPort productIdsPort,
       ProductMapper productMapper) {
-    this.getProductDetailUseCase = getProductDetailUseCase;
-    this.getProductIdsUseCase = getProductIdsUseCase;
+    this.productDetailPort = productDetailPort;
+    this.productIdsPort = productIdsPort;
     this.productMapper = productMapper;
   }
 
@@ -35,19 +35,19 @@ public class ProductDetailController {
   @GetMapping("/{productId}")
   public Mono<ProductDetailResponse> getProductDetail(@PathVariable String productId) {
     GetProductDetailQuery query = new GetProductDetailQuery(productId);
-    Mono<ProductDetail> productDetail = getProductDetailUseCase.execute(query);
+    Mono<ProductDetail> productDetail = productDetailPort.execute(query);
     return productDetail.map(productMapper::toResponse);
   }
 
   @GetMapping("/{productId}/similarids")
   public Flux<String> getProductIds(@PathVariable  String productId) {
     GetProductIdsQuery query = new GetProductIdsQuery(productId);
-    return getProductIdsUseCase.execute(query);
+    return productIdsPort.execute(query);
   }
   @GetMapping("/{productId}/similar")
   public Flux<ProductDetailResponse> getSimilarProductDetails(@PathVariable String productId) {
-    return getProductIdsUseCase.execute(new GetProductIdsQuery(productId))
-        .flatMap(id -> getProductDetailUseCase
+    return productIdsPort.execute(new GetProductIdsQuery(productId))
+        .flatMap(id -> productDetailPort
             .execute(new GetProductDetailQuery(id))
             .map(productMapper::toResponse));
   }

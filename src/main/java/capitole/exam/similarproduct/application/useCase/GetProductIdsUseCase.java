@@ -1,22 +1,21 @@
 package capitole.exam.similarproduct.application.useCase;
 
-import capitole.exam.similarproduct.application.bus.UseCaseBus;
 import capitole.exam.similarproduct.application.query.GetProductIdsQuery;
-import capitole.exam.similarproduct.domain.model.ProductDetail;
-import capitole.exam.similarproduct.infrastructure.persistance.adapter.ProductDetailRepositoryAdapter;
-import java.math.BigDecimal;
+import capitole.exam.similarproduct.domain.port.input.ProductIdsPort;
+import capitole.exam.similarproduct.domain.port.output.ProductDetailRepository;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 @Component
-public class GetProductIdsUseCase implements UseCase<GetProductIdsQuery, Flux<String>> {
-  private final ProductDetailRepositoryAdapter productDetailRepositoryAdapter;
+public class GetProductIdsUseCase implements UseCase<GetProductIdsQuery, Flux<String>>, ProductIdsPort {
+  private final ProductDetailRepository productDetailRepository;
 
-  public GetProductIdsUseCase(ProductDetailRepositoryAdapter productDetailRepositoryAdapter) {
-    this.productDetailRepositoryAdapter = productDetailRepositoryAdapter;
+  public GetProductIdsUseCase(ProductDetailRepository productDetailRepository) {
+    this.productDetailRepository = productDetailRepository;
+
   }
 
   @Override
   public Flux<String> execute(GetProductIdsQuery input) {
-    return productDetailRepositoryAdapter.findSimilarProductIds(input.id());
+    return productDetailRepository.findSimilarProductIds(input.id());
   }
 }

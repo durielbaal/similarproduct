@@ -1,20 +1,21 @@
 package capitole.exam.similarproduct.application.useCase;
 
 import capitole.exam.similarproduct.application.query.GetProductDetailQuery;
-import capitole.exam.similarproduct.application.query.GetProductIdsQuery;
 import capitole.exam.similarproduct.domain.model.ProductDetail;
-import capitole.exam.similarproduct.infrastructure.persistance.adapter.ProductDetailRepositoryAdapter;
+import capitole.exam.similarproduct.domain.port.input.ProductDetailPort;
+import capitole.exam.similarproduct.domain.port.output.ProductDetailRepository;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 @Component
-public class GetProductDetailUseCase implements UseCase<GetProductDetailQuery, Mono<ProductDetail>>{
-  private final ProductDetailRepositoryAdapter productDetailRepositoryAdapter;
-  public GetProductDetailUseCase(ProductDetailRepositoryAdapter productDetailRepositoryAdapter) {
-    this.productDetailRepositoryAdapter = productDetailRepositoryAdapter;
+public class GetProductDetailUseCase implements UseCase<GetProductDetailQuery, Mono<ProductDetail>>, ProductDetailPort {
+  private final ProductDetailRepository productDetailRepository;
+
+  public GetProductDetailUseCase(ProductDetailRepository productDetailRepository) {
+    this.productDetailRepository = productDetailRepository;
   }
 
   @Override
   public Mono<ProductDetail> execute(GetProductDetailQuery input) {
-    return productDetailRepositoryAdapter.findProductDetail(input.id());
+    return productDetailRepository.findProductDetail(input.id());
   }
 }

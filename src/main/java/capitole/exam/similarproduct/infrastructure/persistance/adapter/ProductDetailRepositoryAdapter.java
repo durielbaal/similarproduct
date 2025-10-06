@@ -1,6 +1,7 @@
 package capitole.exam.similarproduct.infrastructure.persistance.adapter;
 
 import capitole.exam.similarproduct.domain.model.ProductDetail;
+import capitole.exam.similarproduct.domain.port.output.ProductDetailRepository;
 import capitole.exam.similarproduct.infrastructure.exception.product.ProductIdNotValidException;
 import capitole.exam.similarproduct.infrastructure.exception.product.ProductNotFoundException;
 import capitole.exam.similarproduct.infrastructure.validator.ProductValidator;
@@ -14,7 +15,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 @Component
-public class ProductDetailRepositoryAdapter {
+public class ProductDetailRepositoryAdapter implements ProductDetailRepository {
   private final WebClient webClient;
   @Value("${webclient.product.detail.url}")
   private String productDetailUrl;
@@ -23,7 +24,7 @@ public class ProductDetailRepositoryAdapter {
   public ProductDetailRepositoryAdapter(WebClient webClient) {
     this.webClient = webClient;
   }
-
+  @Override
   public Flux<String> findSimilarProductIds(String productId) {
     if (!ProductValidator.validateProductId(productId)) {
       return Flux.error(new ProductIdNotValidException());
@@ -43,7 +44,7 @@ public class ProductDetailRepositoryAdapter {
         .bodyToMono(new ParameterizedTypeReference<List<String>>() {})
         .flatMapMany(Flux::fromIterable);
   }
-
+  @Override
   public Mono<ProductDetail> findProductDetail(String productId) {
     if(!ProductValidator.validateProductId(productId)){
       return Mono.error(new ProductIdNotValidException());
