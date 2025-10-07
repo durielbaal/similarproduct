@@ -36,6 +36,17 @@ El proyecto está construido con:
 * **Lombok** (Para reducción de *boilerplate*)
 * **Mockito/JUnit 5** (Para pruebas)
 
+### Estrategia de Caching
+
+La aplicación utiliza **Caffeine** como una **caché local en memoria**. Esto reduce significativamente la latencia y la carga en los servicios externos al servir datos directamente desde la memoria RAM en las peticiones repetidas.
+
+| Componente | Tipo de Caché | Política (Ejemplo) |
+| :--- | :--- | :--- |
+| `productDetails` | Caffeine | TTL (Time-To-Live) de 10 minutos |
+| `similarIds` | Caffeine | Tamaño máximo de 500 elementos |
+
+> **Nota sobre la Arquitectura de Caché:** Se seleccionó Caffeine por su **facilidad de implementación** y su excelente rendimiento como **caché de primer nivel (L1)**. Para soluciones que requieren **persistencia, escalabilidad horizontal y distribución** entre múltiples instancias de la API, se debería considerar una arquitectura multinivel incorporando **Redis** como caché de segundo nivel (L2). Las ventajas de Redis incluyen la persistencia de datos tras reinicios y la unificación del estado de caché entre servidores.
+
 ### Configuración del WebClient
 
 La aplicación utiliza un cliente HTTP reactivo configurado para interactuar con servicios externos (mockeados). Los parámetros clave se gestionan en `application.properties` (o `application.yml`):
