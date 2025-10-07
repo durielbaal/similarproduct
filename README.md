@@ -8,7 +8,7 @@ El proyecto sigue una arquitectura limpia y modular:
 
 ### 1. Application Layer (Capa de Aplicación)
 * **Queries:** Contiene las clases `Query` (ej. `GetProductDetailQuery`) que son simples peticiones de datos.
-* * **Commands:**  En una arquitectura CQRS completa, los Commands encapsulan operaciones de escritura (es decir, acciones que cambian el estado del sistema, como crear, actualizar o eliminar datos). Este proyecto no incluye actualmente ninguna clase Command porque el alcance se limita a funcionalidades de solo lectura, lo que no requiere gestionar escrituras directas a la base de datos o modificar el estado de la aplicación.
+* **Commands:**  En una arquitectura CQRS completa, los Commands encapsulan operaciones de escritura (es decir, acciones que cambian el estado del sistema, como crear, actualizar o eliminar datos). Este proyecto no incluye actualmente ninguna clase Command porque el alcance se limita a funcionalidades de solo lectura, lo que no requiere gestionar escrituras directas a la base de datos o modificar el estado de la aplicación.
 * **Bus:** Implementado por `SimpleUseCaseBus`, que enruta cada `Query` a su `UseCase` (manejador) correspondiente basándose en el tipo de entrada (`I`).
 * **Use Cases:** Contiene la lógica de negocio central (el "corazón") de la aplicación.
 
