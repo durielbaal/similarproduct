@@ -34,7 +34,7 @@ El proyecto está construido con:
 * **Spring WebFlux** (Programación Reactiva)
 * **Reactor** (Para manejo de flujos de datos asíncronos)
 * **Lombok** (Para reducción de *boilerplate*)
-* **Mockito/JUnit 5** (Para pruebas)
+* **Mockito/JUnit** (Para pruebas)
 
 ### Estrategia de Caching
 
